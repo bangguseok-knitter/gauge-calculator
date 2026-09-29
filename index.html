@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>방구석뜨개 Stitch Lab · 코·단 변형</title>
+<title>방구석뜨개 Stitch Lab · 게이지 계산기</title>
 <style>
 :root{
   --ink:#0d2c4c;
@@ -36,10 +36,10 @@ body{
 button,input,textarea,summary{font:inherit}
 button{cursor:pointer}
 .hero{
-  width:calc(100% - 36px);
-  max-width:944px;
-  margin:0 auto;
-  height:280px;
+  width:100%;
+  max-width:none;
+  margin:0;
+  height:auto;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -50,9 +50,9 @@ button{cursor:pointer}
 }
 .hero img{
   display:block;
-  width:auto;
-  height:100%;
-  max-width:100%;
+  width:min(944px,calc(100vw - 36px));
+  height:auto;
+  max-width:none;
   object-fit:contain;
   object-position:center;
   margin:0 auto;
@@ -247,15 +247,11 @@ button{cursor:pointer}
 <section id="both" class="tool-section">
   <div class="tool-head"><div class="tool-title-wrap"><h2>코와 단 함께 변형</h2><div class="en">PATTERN CONVERT</div></div><p class="tool-desc">도안의 코와 단 수를 내 게이지에 맞게 변형합니다.</p></div>
   <div class="form-grid"><div class="field"><label for="pSt">도안의 코 수</label><input id="pSt" type="number" min="1" step="1" placeholder="예: 40"></div><div class="field"><label for="pRow">도안의 단 수</label><input id="pRow" type="number" min="1" step="1" placeholder="예: 50"></div></div>
-  <details class="optional-box"><summary>무늬 반복 조건 <span style="font-weight:500;color:#8a8f96">(선택)</span></summary>
-    <div class="optional-content"><div class="form-grid"><div class="field"><label>코 반복수</label><input id="bothStRepeat" type="number" min="1" step="1" placeholder="예: 6"></div><div class="field"><label>고정 가장자리 코</label><input id="bothStEdge" type="number" min="0" step="1" placeholder="예: 2"></div><div class="field"><label>단 반복수</label><input id="bothRowRepeat" type="number" min="1" step="1" placeholder="예: 4"></div><div class="field"><label>고정 단 수</label><input id="bothRowFixed" type="number" min="0" step="1" placeholder="예: 0"></div></div><div class="inline-note">반복 조건이 없으면 비워두세요. 입력하면 계산값에 가장 가까운 사용 가능한 코·단 수를 찾아줍니다.</div></div>
-  </details>
   <div class="action-row"><button class="primary-btn" onclick="calcBoth()">변형하기 →</button></div>
 </section>
 <section id="st" class="tool-section hidden">
   <div class="tool-head"><div class="tool-title-wrap"><h2>코 수만 변형</h2><div class="en">STITCH CONVERT</div></div><p class="tool-desc">폭을 결정하는 코 수만 내 게이지에 맞게 변형합니다.</p></div>
   <div class="form-grid"><div class="field"><label for="onlySt">도안의 코 수</label><input id="onlySt" type="number" min="1" step="1" placeholder="예: 40"></div><div class="field"><label>사용 기준</label><div class="inline-note" style="margin:0">위 MY GAUGE에 입력한 도안 코 게이지와 내 코 게이지를 사용합니다.</div></div></div>
-  <details class="optional-box"><summary>무늬 반복 조건 <span style="font-weight:500;color:#8a8f96">(선택)</span></summary><div class="optional-content"><div class="form-grid"><div class="field"><label>코 반복수</label><input id="stRepeat" type="number" min="1" step="1" placeholder="예: 6"></div><div class="field"><label>고정 가장자리 코</label><input id="stEdge" type="number" min="0" step="1" placeholder="예: 2"></div></div></div></details>
   <div class="action-row"><button class="primary-btn" onclick="calcSt()">코 수 계산하기 →</button></div>
 </section>
 <section id="row" class="tool-section hidden">
@@ -359,12 +355,10 @@ function calcBoth(){
   const g=gaugeCheck(); if(!g)return;
   const s=val('pSt'),r=val('pRow');
   if(!positiveInt(s)||!positiveInt(r)){alertField('도안의 코 수와 단 수는 1 이상의 정수로 입력해주세요.');return}
-  const sp=optionalPattern('bothStRepeat','bothStEdge','코'); if(sp===false)return;
-  const rp=optionalPattern('bothRowRepeat','bothRowFixed','단'); if(rp===false)return;
   const rawS=s*g.ms/g.os, rawR=r*g.mr/g.or;
   const roundS=Math.round(rawS),roundR=Math.round(rawR);
-  const useS=sp?nearestPattern(rawS,sp.repeat,sp.fixed):roundS;
-  const useR=rp?nearestPattern(rawR,rp.repeat,rp.fixed):roundR;
+  const useS=roundS;
+  const useR=roundR;
   const targetW=s/g.os*10,targetH=r/g.or*10;
   const expectedW=useS/g.ms*10,expectedH=useR/g.mr*10;
   const st=resultCard('변형된 코 수',useS,'코',[
@@ -378,8 +372,7 @@ function calcBoth(){
 function calcSt(){
   const g=stitchGaugeCheck(); if(!g)return;
   const s=val('onlySt'); if(!positiveInt(s)){alertField('도안의 코 수는 1 이상의 정수로 입력해주세요.');return}
-  const p=optionalPattern('stRepeat','stEdge','코'); if(p===false)return;
-  const rawS=s*g.ms/g.os, roundS=Math.round(rawS),useS=p?nearestPattern(rawS,p.repeat,p.fixed):roundS;
+  const rawS=s*g.ms/g.os, roundS=Math.round(rawS),useS=roundS;
   const targetW=s/g.os*10,expectedW=useS/g.ms*10;
   setResult(resultCard('변형된 코 수',useS,'코',[
     ['이론 계산값',`${fmt(rawS)} 코`],['단순 반올림',`${roundS} 코`],['예상 폭',`${fmt(expectedW)} cm`],['목표 폭',`${fmt(targetW)} cm`]
